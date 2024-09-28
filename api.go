@@ -3,10 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 type apiFunc func(w http.ResponseWriter, r *http.Request) error
@@ -46,8 +45,8 @@ var DB = DataBase{
 func (s *ApiServer) Run() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", makeHTTPHandleFunc(getRoot))
-	router.HandleFunc("/account", makeHTTPHandleFunc(handlerAccountFunc))
-	router.HandleFunc("/account/{id}", makeHTTPHandleFunc(handlerAccountFunc))
+	router.HandleFunc("/accounts", makeHTTPHandleFunc(handlerAccountFunc))
+	router.HandleFunc("/accounts/{id}", makeHTTPHandleFunc(handlerAccountFunc))
 	http.ListenAndServe(s.port, router)
 }
 
