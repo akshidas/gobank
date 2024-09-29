@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
-	"strconv"
 )
 
 type apiFunc func(w http.ResponseWriter, r *http.Request) error
@@ -54,43 +53,4 @@ func (s *ApiServer) Run() {
 func getRoot(w http.ResponseWriter, r *http.Request) error {
 	fmt.Printf("got / request\n")
 	return writeJson(w, http.StatusOK, "Server UP and running")
-}
-
-func handlerAccountFunc(w http.ResponseWriter, r *http.Request) error {
-	if r.Method == "GET" {
-		return getAccount(w, r)
-	}
-
-	if r.Method == "POST" {
-		return AddAccount(w, r)
-	}
-	return writeJson(w, http.StatusMethodNotAllowed, "method not allowed")
-}
-
-// getAccount will handle get request for fetch all and for fetch by id
-func getAccount(w http.ResponseWriter, r *http.Request) error {
-	accountId, ok := mux.Vars(r)["id"]
-	if !ok {
-		return writeJson(w, http.StatusOK, DB.getAccounts())
-	}
-
-	id, err := strconv.Atoi(accountId)
-	if err != nil {
-		return writeJson(w, http.StatusInternalServerError, err)
-	}
-
-	account := DB.getAccountById(int(id))
-	if account == nil {
-		return writeJson(w, http.StatusNotFound, "Not Found")
-	}
-
-	return writeJson(w, http.StatusOK, account)
-}
-
-func AddAccount(w http.ResponseWriter, r *http.Request) error {
-	decoder := json.NewDecoder(r.Body)
-	t := Account{}
-	decoder.Decode(&t)
-	DB.AddAccount(&t)
-	return writeJson(w, http.StatusCreated, "create route")
 }
