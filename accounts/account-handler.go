@@ -2,12 +2,12 @@ package accounts
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
+	"math/rand"
 	"net/http"
 	"strconv"
-)
 
-var DB = DataBase{}
+	"github.com/gorilla/mux"
+)
 
 func WriteJson(w http.ResponseWriter, status int, v any) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -34,7 +34,7 @@ func HandlerAccountFunc(w http.ResponseWriter, r *http.Request) error {
 func getAccount(w http.ResponseWriter, r *http.Request) error {
 	accountId, ok := mux.Vars(r)["id"]
 	if !ok {
-		return WriteJson(w, http.StatusOK, DB.getAll())
+		return WriteJson(w, http.StatusOK, getAll())
 	}
 
 	return getAccountById(accountId, w, r)
@@ -46,8 +46,8 @@ func getAccountById(accountId string, w http.ResponseWriter, r *http.Request) er
 		return WriteJson(w, http.StatusInternalServerError, err)
 	}
 
-	account, _ := DB.getById(int(id))
-	if account == nil {
+	account, index := getById(int(id))
+	if index == -1 {
 		return WriteJson(w, http.StatusNotFound, "Not Found")
 	}
 
@@ -58,7 +58,8 @@ func addAccount(w http.ResponseWriter, r *http.Request) error {
 	decoder := json.NewDecoder(r.Body)
 	t := Account{}
 	decoder.Decode(&t)
-	DB.Add(&t)
+	t.ID = rand.Intn(1000)
+	Add(t)
 	return WriteJson(w, http.StatusCreated, "create route")
 }
 
@@ -77,6 +78,6 @@ func updateAccount(w http.ResponseWriter, r *http.Request) error {
 	t := Account{}
 	t.ID = id
 	decoder.Decode(&t)
-	DB.Update(id, t)
+	Update(id, t)
 	return WriteJson(w, http.StatusCreated, "update route")
 }
