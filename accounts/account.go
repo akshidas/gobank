@@ -1,4 +1,4 @@
-package main
+package accounts
 
 type Account struct {
 	ID        int    `json:"id"`

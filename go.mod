@@ -1,4 +1,4 @@
-module github.com/akshidas/gobank
+module gobank
 
 go 1.23.1
 
