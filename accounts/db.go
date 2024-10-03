@@ -10,10 +10,6 @@ import (
 
 type Accounts []Account
 
-type AccountsFile struct {
-	Data Accounts `json:"data"`
-}
-
 func getAll() Accounts {
 	return initAccounts()
 }
@@ -46,8 +42,13 @@ func Update(id int, updateData Account) error {
 	return nil
 }
 
-func writeAccount(account Accounts) {
-	file := &AccountsFile{
+type DataBase struct {
+	File string
+	Data Accounts `json:"data"`
+}
+
+func (d *DataBase) writeAccount(account Accounts) {
+	file := &DataBase{
 		Data: account,
 	}
 	jsonFile, _ := json.Marshal(file)
@@ -70,7 +71,7 @@ func initAccounts() Accounts {
 	}
 
 	a := Accounts{}
-	file := &AccountsFile{
+	file := &DataBase{
 		Data: a,
 	}
 
@@ -81,5 +82,4 @@ func initAccounts() Accounts {
 	}
 
 	return file.Data
-
 }
