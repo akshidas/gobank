@@ -2,23 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
-	account "gobank/accounts"
+	"gobank/accounts"
+	"gobank/helpers"
+	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type apiFunc func(w http.ResponseWriter, r *http.Request) error
 
 type ApiError struct {
 	Error string
-}
-
-func makeHTTPHandleFunc(f apiFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if err := f(w, r); err != nil {
-			account.WriteJson(w, http.StatusBadRequest, &ApiError{Error: err.Error()})
-		}
-	}
 }
 
 type ApiServer struct {
@@ -33,14 +28,18 @@ func NewApiServer(listentPort string) *ApiServer {
 
 func (s *ApiServer) Run() {
 	router := mux.NewRouter()
-	router.HandleFunc("/", makeHTTPHandleFunc(getRoot))
-	router.HandleFunc("/accounts", makeHTTPHandleFunc(account.HandlerAccountFunc))
-	router.HandleFunc("/accounts/{id}", makeHTTPHandleFunc(account.HandlerAccountFunc))
-	http.ListenAndServe(s.port, router)
+	router.HandleFunc("/", helpers.MakeHTTPHandleFunc(getRoot))
+	router.HandleFunc("/accounts", helpers.MakeHTTPHandleFunc(accounts.HandlerAccountFunc))
+	router.HandleFunc("/accounts/{id}", helpers.MakeHTTPHandleFunc(accounts.HandlerAccountFunc))
+	log.Printf("Starting the server on port%s", s.port)
+	err := http.ListenAndServe(s.port, router)
+	if err != nil {
+		log.Fatalf("Failed to start the server due to: %s", err)
+	}
 }
 
 // Handler for root route
 func getRoot(w http.ResponseWriter, r *http.Request) error {
 	fmt.Printf("got / request\n")
-	return account.WriteJson(w, http.StatusOK, "Server UP and running")
+	return helpers.WriteJson(w, http.StatusOK, "Server UP and running")
 }
